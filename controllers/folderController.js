@@ -1,5 +1,7 @@
 import { Folder } from "../models/Folder.js";
+
 import Image from "../models/image.js";
+
 
 // ✅ validation middleware (used in routes)
 export const validateCreate = (req, res, next) => {
