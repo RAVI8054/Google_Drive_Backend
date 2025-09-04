@@ -1,4 +1,4 @@
-import { Image } from "../models/Image.js";
+import Image from "../models/Image.js";   // 
 import { Folder } from "../models/Folder.js";
 
 // ✅ validate upload request
