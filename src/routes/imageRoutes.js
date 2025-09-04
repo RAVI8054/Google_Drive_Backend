@@ -1,7 +1,5 @@
-// routes/imageRoutes.js
 import express from "express";
 import auth from "../middleware/authMiddleware.js";
-import upload from "../utils/upload.js";
 import {
   uploadImage,
   searchImages,
@@ -15,8 +13,8 @@ const router = express.Router();
 // Protect all routes
 router.use(auth);
 
-// Upload image
-router.post("/", upload.single("image"), validateUpload, uploadImage);
+// Upload image (Cloudinary URL)
+router.post("/", validateUpload, uploadImage);
 
 // ✅ Get all user images (optionally by folderId)
 router.get("/", getImages);

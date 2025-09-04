@@ -1,27 +1,22 @@
-// controllers/imageController.js
-import Image from "../models/image.js"
-import cloudinary from "../utils/cloudinary.js";
+import Image from "../models/image.js";
 
-// 📌 Upload Image
+// 📌 Upload Image (from frontend → Cloudinary → backend)
 export const uploadImage = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { name, folderId } = req.body;
+    const { name, url, folderId, publicId, format, size } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file provided" });
+    if (!url) {
+      return res.status(400).json({ message: "Image URL is required" });
     }
-
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "drive_images",
-    });
 
     const newImage = await Image.create({
       user: userId,
       name,
-      url: result.secure_url,
-      public_id: result.public_id,
+      url,
+      publicId: publicId || null,
+      format: format || null,
+      size: size || null,
       folder: folderId || null, // ✅ supports nested folders
     });
 
@@ -75,6 +70,9 @@ export const searchImages = async (req, res) => {
 export const validateUpload = (req, res, next) => {
   if (!req.body.name) {
     return res.status(400).json({ message: "Image name is required" });
+  }
+  if (!req.body.url) {
+    return res.status(400).json({ message: "Image URL is required" });
   }
   next();
 };
