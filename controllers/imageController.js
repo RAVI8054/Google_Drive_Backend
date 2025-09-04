@@ -1,72 +1,87 @@
-import Image from "../models/Image.js";   // 
-import { Folder } from "../models/Folder.js";
+// controllers/imageController.js
+import Image from "../models/image.js"
+import cloudinary from "../utils/cloudinary.js";
 
-// ✅ validate upload request
+// 📌 Upload Image
+export const uploadImage = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, folderId } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "drive_images",
+    });
+
+    const newImage = await Image.create({
+      user: userId,
+      name,
+      url: result.secure_url,
+      public_id: result.public_id,
+      folder: folderId || null, // ✅ supports nested folders
+    });
+
+    res.status(201).json(newImage);
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Error uploading image" });
+  }
+};
+
+// 📌 Get All Images (optionally filter by folder)
+export const getImages = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { folderId } = req.query;
+
+    const query = { user: userId };
+    if (folderId) query.folder = folderId;
+
+    const images = await Image.find(query).sort({ createdAt: -1 });
+    res.json(images);
+  } catch (err) {
+    console.error("Error fetching images:", err);
+    res.status(500).json({ message: "Error fetching images" });
+  }
+};
+
+// 📌 Search Images
+export const searchImages = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { q } = req.query;
+
+    if (!q || q.trim() === "") {
+      return res.json([]);
+    }
+
+    const images = await Image.find({
+      user: userId,
+      name: { $regex: q, $options: "i" }, // case-insensitive search
+    }).sort({ createdAt: -1 });
+
+    res.json(images);
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ message: "Error searching images" });
+  }
+};
+
+// 📌 Validators
 export const validateUpload = (req, res, next) => {
   if (!req.body.name) {
     return res.status(400).json({ message: "Image name is required" });
   }
-  if (!req.body.folderId) {
-    return res.status(400).json({ message: "Folder ID is required" });
-  }
   next();
 };
 
-// ✅ upload image
-export const uploadImage = async (req, res) => {
-  try {
-    const { name, folderId } = req.body;
-
-    // check folder ownership
-    const folder = await Folder.findOne({ _id: folderId, user: req.user._id });
-    if (!folder) {
-      return res.status(404).json({ message: "Folder not found" });
-    }
-
-    // check file
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
-    }
-
-    const image = await Image.create({
-      name,
-      user: req.user._id,
-      folder: folder._id,
-      filename: req.file.filename,
-      url: `/uploads/${req.file.filename}`,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-    });
-
-    res.status(201).json(image);
-  } catch (err) {
-    res.status(500).json({ message: "Error uploading image", error: err.message });
-  }
-};
-
-// ✅ validate search query
 export const validateSearch = (req, res, next) => {
   if (!req.query.q) {
-    return res.status(400).json({ message: "Search query 'q' is required" });
+    return res.status(400).json({ message: "Search query is required" });
   }
   next();
-};
-
-// ✅ search images by name (user-specific)
-export const searchImages = async (req, res) => {
-  try {
-    const q = req.query.q || "";
-    const regex = new RegExp(q, "i");
-
-    const images = await Image.find({
-      user: req.user._id,
-      name: regex,
-    })
-      .sort("-createdAt")
-      .limit(100);
-
-    res.json(images);
-  } catch (err) {
-    res.status(500).json({ message: "Error searching images", error: err.message });
-  }
 };
