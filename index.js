@@ -1,12 +1,13 @@
+// backend/index.js
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import connectDB from "./config/db.js";
+import connectDB from "./src/config/db.js";
 
-import authRoutes from "./routes/authRoutes.js";
-import folderRoutes from "./routes/folderRoutes.js";
-import imageRoutes from "./routes/imageRoutes.js";
-import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import folderRoutes from "./src/routes/folderRoutes.js";
+import imageRoutes from "./src/routes/imageRoutes.js";
+import { notFound, errorHandler } from "./src/middleware/errorHandler.js";
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.use(
         return callback(new Error("CORS not allowed for this origin"));
       }
     },
-    credentials: true, // ✅ allows cookies / auth headers
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
