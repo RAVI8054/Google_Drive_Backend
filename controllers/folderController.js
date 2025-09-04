@@ -1,4 +1,4 @@
-import { Folder } from "../models/Folder.js";
+import Folder from "../models/Folder.js";
 
 import Image from "../models/image.js";
 
