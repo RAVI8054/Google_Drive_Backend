@@ -1,6 +1,6 @@
 import Image from "../models/image.js";
 
-// 🖼️ Create image
+//  Create image
 export const createImage = async (req, res) => {
   try {
     const { name, url, publicId, format, size, folderId } = req.body;
@@ -16,7 +16,7 @@ export const createImage = async (req, res) => {
       format,
       size,
       folder: folderId || null,
-      user: req.user.id, // ✅ fixed (was _id before)
+      user: req.user.id, 
     });
 
     res.status(201).json(image);
@@ -26,13 +26,13 @@ export const createImage = async (req, res) => {
   }
 };
 
-// 📂 Get images (support filtering by folder)
+//  Get images (support filtering by folder)
 export const getImages = async (req, res) => {
   try {
     const { parentId } = req.query;
 
     const images = await Image.find({
-      user: req.user.id, // ✅ fixed for consistency
+      user: req.user.id, 
       folder: parentId || null,
     });
 
@@ -43,12 +43,12 @@ export const getImages = async (req, res) => {
   }
 };
 
-// 🗑️ Delete image
+//  Delete image
 export const deleteImage = async (req, res) => {
   try {
     const image = await Image.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.id, // ✅ fixed for consistency
+      user: req.user.id, 
     });
 
     if (!image) return res.status(404).json({ message: "Image not found" });

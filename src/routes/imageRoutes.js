@@ -4,13 +4,13 @@ import { createImage, getImages, deleteImage } from "../controllers/imageControl
 
 const router = express.Router();
 
-// 🖼️ Create image (metadata from frontend after Cloudinary upload)
+//  Create image (metadata from frontend after Cloudinary upload)
 router.post("/", auth, createImage);
 
-// 🖼️ Get all images (optionally by folder)
+//  Get all images (optionally by folder)
 router.get("/", auth, getImages);
 
-// 🗑️ Delete image
+// Delete image
 router.delete("/:id", auth, deleteImage);
 
 export default router;

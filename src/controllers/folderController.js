@@ -1,7 +1,7 @@
 import Folder from "../models/Folder.js";
 import Image from "../models/image.js";
 
-// ✅ validation middleware (used in routes)
+//  validation middleware (used in routes)
 export const validateCreate = (req, res, next) => {
   if (!req.body.name) {
     return res.status(400).json({ message: "Folder name is required" });
@@ -9,7 +9,7 @@ export const validateCreate = (req, res, next) => {
   next();
 };
 
-// ✅ create folder (supports nested)
+//  create folder (supports nested)
 export const createFolder = async (req, res) => {
   try {
     const { name, parentId } = req.body;
@@ -24,7 +24,7 @@ export const createFolder = async (req, res) => {
 
     const folder = await Folder.create({
       name,
-      user: req.user.id,  // 🔄 changed from _id → id
+      user: req.user.id,  
       parent: parent ? parent._id : null,
     });
 
@@ -36,18 +36,18 @@ export const createFolder = async (req, res) => {
   }
 };
 
-// ✅ list folders/images by parent
+//  list folders/images by parent
 export const listByParent = async (req, res) => {
   try {
     const { parentId } = req.query;
 
     const folders = await Folder.find({
-      user: req.user.id,   // 🔄 changed from _id → id
+      user: req.user.id,  
       parent: parentId || null,
     }).sort("name");
 
     const images = await Image.find({
-      user: req.user.id,   // 🔄 changed from _id → id
+      user: req.user.id,  
       folder: parentId || null,
     }).sort("-createdAt");
 
