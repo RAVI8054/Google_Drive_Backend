@@ -16,7 +16,8 @@ const app = express();
 // ✅ Allowed origins: localhost (dev) + your deployed frontend
 const allowedOrigins = [
   "http://localhost:5173", // Vite dev server
-  "https://your-frontend-domain.vercel.app", // replace with your real Vercel frontend URL
+  "https://google-drive-clone-fronted.vercel.app/"
+  , // replace with your real Vercel frontend URL
 ];
 
 app.use(
