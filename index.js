@@ -1,4 +1,3 @@
-// backend/index.js
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -13,22 +12,19 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allowed origins (no trailing slash!)
 const allowedOrigins = [
-  "http://localhost:5173", // local dev
-  "https://google-drive-clone-fronted.vercel.app" // deployed frontend
+  "http://localhost:5173",
+  "https://google-drive-clone-fronted.vercel.app"
 ];
 
-// ✅ CORS middleware (must be before routes)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // allow Thunder Client / curl
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS not allowed for origin: ${origin}`));
+        return callback(null, true);
       }
+      return callback(new Error("CORS not allowed for this origin"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -36,27 +32,23 @@ app.use(
   })
 );
 
-// ✅ Explicitly handle OPTIONS preflight for all routes
-app.options("*", cors());
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/folders", folderRoutes);
 app.use("/api/images", imageRoutes);
 
-// ✅ Health check
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "cloud-drive-backend" });
 });
 
-// ✅ Middleware
 app.use(notFound);
 app.use(errorHandler);
 
 connectDB();
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ API running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`✅ API running on http://localhost:${PORT}`)
+);
