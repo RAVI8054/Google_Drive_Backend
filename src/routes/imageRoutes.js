@@ -1,25 +1,16 @@
 import express from "express";
 import auth from "../middleware/authMiddleware.js";
-import {
-  uploadImage,
-  searchImages,
-  getImages,
-  validateUpload,
-  validateSearch,
-} from "../controllers/imageController.js";
+import { createImage, getImages, deleteImage } from "../controllers/imageController.js";
 
 const router = express.Router();
 
-// Protect all routes
-router.use(auth);
+// 🖼️ Create image (metadata from frontend after Cloudinary upload)
+router.post("/", auth, createImage);
 
-// Upload image (Cloudinary URL)
-router.post("/", validateUpload, uploadImage);
+// 🖼️ Get all images (optionally by folder)
+router.get("/", auth, getImages);
 
-// ✅ Get all user images (optionally by folderId)
-router.get("/", getImages);
-
-// Search images
-router.get("/search", validateSearch, searchImages);
+// 🗑️ Delete image
+router.delete("/:id", auth, deleteImage);
 
 export default router;

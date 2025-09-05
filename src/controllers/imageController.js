@@ -1,85 +1,61 @@
 import Image from "../models/image.js";
 
-// 📌 Upload Image (from frontend → Cloudinary → backend)
-export const uploadImage = async (req, res) => {
+// 🖼️ Create image
+export const createImage = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { name, url, folderId, publicId, format, size } = req.body;
+    const { name, url, publicId, format, size, folderId } = req.body;
 
-    if (!url) {
-      return res.status(400).json({ message: "Image URL is required" });
+    if (!name || !url) {
+      return res.status(400).json({ message: "Name and URL are required" });
     }
 
-    const newImage = await Image.create({
-      user: userId,
+    const image = await Image.create({
       name,
       url,
-      publicId: publicId || null,
-      format: format || null,
-      size: size || null,
-      folder: folderId || null, // ✅ supports nested folders
+      publicId,
+      format,
+      size,
+      folder: folderId || null,
+      user: req.user.id, // ✅ fixed (was _id before)
     });
 
-    res.status(201).json(newImage);
+    res.status(201).json(image);
   } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ message: "Error uploading image" });
+    console.error("Create image error:", err);
+    res.status(500).json({ message: "Failed to create image" });
   }
 };
 
-// 📌 Get All Images (optionally filter by folder)
+// 📂 Get images (support filtering by folder)
 export const getImages = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { folderId } = req.query;
-
-    const query = { user: userId };
-    if (folderId) query.folder = folderId;
-
-    const images = await Image.find(query).sort({ createdAt: -1 });
-    res.json(images);
-  } catch (err) {
-    console.error("Error fetching images:", err);
-    res.status(500).json({ message: "Error fetching images" });
-  }
-};
-
-// 📌 Search Images
-export const searchImages = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { q } = req.query;
-
-    if (!q || q.trim() === "") {
-      return res.json([]);
-    }
+    const { parentId } = req.query;
 
     const images = await Image.find({
-      user: userId,
-      name: { $regex: q, $options: "i" }, // case-insensitive search
-    }).sort({ createdAt: -1 });
+      user: req.user.id, // ✅ fixed for consistency
+      folder: parentId || null,
+    });
 
-    res.json(images);
+    res.json({ images });
   } catch (err) {
-    console.error("Search error:", err);
-    res.status(500).json({ message: "Error searching images" });
+    console.error("Get images error:", err);
+    res.status(500).json({ message: "Failed to fetch images" });
   }
 };
 
-// 📌 Validators
-export const validateUpload = (req, res, next) => {
-  if (!req.body.name) {
-    return res.status(400).json({ message: "Image name is required" });
-  }
-  if (!req.body.url) {
-    return res.status(400).json({ message: "Image URL is required" });
-  }
-  next();
-};
+// 🗑️ Delete image
+export const deleteImage = async (req, res) => {
+  try {
+    const image = await Image.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id, // ✅ fixed for consistency
+    });
 
-export const validateSearch = (req, res, next) => {
-  if (!req.query.q) {
-    return res.status(400).json({ message: "Search query is required" });
+    if (!image) return res.status(404).json({ message: "Image not found" });
+
+    res.json({ message: "Image deleted", image });
+  } catch (err) {
+    console.error("Delete image error:", err);
+    res.status(500).json({ message: "Failed to delete image" });
   }
-  next();
 };
