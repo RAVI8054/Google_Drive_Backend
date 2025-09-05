@@ -13,22 +13,21 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allowed origins: localhost (dev) + your deployed frontend
+// ✅ Allowed origins (no trailing slash!)
 const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "https://google-drive-clone-fronted.vercel.app"
-  , // replace with your real Vercel frontend URL
+  "http://localhost:5173", // local dev
+  "https://google-drive-clone-fronted.vercel.app" // deployed frontend
 ];
 
+// ✅ CORS middleware (must be before routes)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow Thunder Client / curl
       if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
       } else {
-        return callback(new Error("CORS not allowed for this origin"));
+        callback(new Error(`CORS not allowed for origin: ${origin}`));
       }
     },
     credentials: true,
@@ -36,6 +35,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Explicitly handle OPTIONS preflight for all routes
+app.options("*", cors());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -50,10 +52,8 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "cloud-drive-backend" });
 });
 
-// ✅ 404 middleware
+// ✅ Middleware
 app.use(notFound);
-
-// ✅ Error handler
 app.use(errorHandler);
 
 connectDB();
