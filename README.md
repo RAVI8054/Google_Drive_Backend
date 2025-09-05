@@ -33,20 +33,21 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ```
 ## 🛠️Installation
-# Clone repo
+### Clone repo
 ```
 git clone https://github.com/your-username/Google_Drive_Clone_Backend.git
 cd Google_Drive_Clone_Backed
 
 ```
 
-# Install dependencies
+### Install dependencies
 ```
 npm install
 ```
 
-# Run in development
+### Run in development
 ```
 npm run dev
 ```
+
 
